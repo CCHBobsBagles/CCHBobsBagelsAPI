@@ -1,12 +1,7 @@
 class WelcomeController < ApplicationController
 
-def index
-<<<<<<< HEAD
-  render text: "WECOME!"
-end
-=======
-
-  render text: "WECOME!"
->>>>>>> e839253... Resolved merge conflict
+  def index
+    render text: "WECOME! App up and running..."
+  end
 
 end
