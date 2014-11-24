@@ -9,20 +9,9 @@ class OrdersController < ApplicationController
 
  def create
     @order = Order.create(order_params)
-    Stripe.api_key = ENV["STRIPE_SECRET_TEST"]
     token = params[:order][:access_token]
     price = (params[:order][:price].to_i)*100
-    # Create the charge on Stripe's servers - this will charge the user's card
-    begin
-      charge = Stripe::Charge.create(
-        :amount => price, # amount in cents, again
-        :currency => "usd",
-        :card => token,
-      )
-      rescue Stripe::CardError => e
-      # The card has been declined
-    end
-
+    charge_customer(token, price)
     if @order.save
       render json: @order, status: :created, location: @order
     else
@@ -53,6 +42,19 @@ class OrdersController < ApplicationController
 
 
   private
+
+  def charge_customer(token, price)
+    # Create the charge on Stripe's servers - this will charge the user's card
+    begin
+      charge = Stripe::Charge.create(
+        :amount => price, # amount in cents, again
+        :currency => "usd",
+        :card => token,
+      )
+      rescue Stripe::CardError => e
+      # The card has been declined
+    end
+  end
 
   def order_params
     params.require(:order).permit(:price, :street, :city, :state, :zipcode, :access_token, :name, order_items_attributes:[:id, :name, :price])
